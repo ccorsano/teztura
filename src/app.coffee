@@ -241,7 +241,8 @@ $(document).ready ()->
   toolsProperties = new PropertyPanel '#tools > .properties'
   editor = new Editor()
   editor.createDoc(512, 512)
-  
+
+  testWebGL = new PreviewWebGL($('#TestWebGL')[0])
 
   createToolsButtons($('#tools > .buttons'))
   createRenderersButtons($('#renderers > .buttons'))

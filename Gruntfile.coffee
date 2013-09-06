@@ -19,10 +19,23 @@ module.exports = (grunt)->
         src: ['src/renderers/*.js'],
         dest: 'out/js/teztura-renderers.js',
 
+    copy:
+      main:
+        files: [
+          { expand: true, src:'node_modules/three/*.js', dest:'out/js/vendor/', filter:'isFile', flatten: true },
+          { expand: true, src:'src/test/*.html', dest:'out/', filter:'isFile', flatten: true }
+        ]
+
     watch:
       coffee:
         files: ['src/core/*.coffee', 'src/*.coffee']
         tasks: ['coffee']
+        options:
+          livereload: true
+
+      copy:
+        files: ['src/test/*.html']
+        tasks: ['copy']
         options:
           livereload: true
 
@@ -45,7 +58,8 @@ module.exports = (grunt)->
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-concat')
   grunt.loadNpmTasks('grunt-contrib-watch')
+  grunt.loadNpmTasks('grunt-contrib-copy')
 
   # Default task(s).
-  grunt.registerTask('default', ['coffee', 'concat'])
+  grunt.registerTask('default', ['coffee', 'concat', 'copy'])
   grunt.registerTask('live', ['connect', 'watch'])

@@ -1,6 +1,7 @@
-var BlendModes, Commands, Document, DocumentView, Editor, FlattenBrush, Matcaps, Picker, PropertyPanel, PropertyView, Renderers, RoundBrush, StepBrush, Tools, createCommandsButtons, createPalette, createRenderersButtons, createToolsButtons, editor, loadGradient, loadMatcaps, refresh, status, toolsProperties, _ref,
+var BlendModes, Commands, Document, DocumentView, Editor, FlattenBrush, Matcaps, Picker, PreviewWebGL, PropertyPanel, PropertyView, Renderers, RoundBrush, StepBrush, Tools, createCommandsButtons, createPalette, createRenderersButtons, createToolsButtons, editor, loadGradient, loadMatcaps, refresh, status, toolsProperties, _ref,
   __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Renderers = null;
 
@@ -296,6 +297,7 @@ $(window).keyup(function(e) {
 });
 
 $(document).ready(function() {
+  var testWebGL;
   loadGradient('g1', 'img/gradient-1.png');
   loadMatcaps([
     {
@@ -308,6 +310,7 @@ $(document).ready(function() {
   toolsProperties = new PropertyPanel('#tools > .properties');
   editor = new Editor();
   editor.createDoc(512, 512);
+  testWebGL = new PreviewWebGL($('#TestWebGL')[0]);
   createToolsButtons($('#tools > .buttons'));
   createRenderersButtons($('#renderers > .buttons'));
   createPalette($('#palette'));
@@ -580,6 +583,50 @@ Document = (function() {
   };
 
   return Document;
+
+})();
+
+PreviewWebGL = (function() {
+  function PreviewWebGL(container) {
+    this.container = container;
+    this.Init = __bind(this.Init, this);
+    this.Init();
+  }
+
+  PreviewWebGL.prototype.Init = function() {
+    var ambientLight, directionalLight,
+      _this = this;
+    this.camera = new THREE.PerspectiveCamera(35, 1, 1, 10000);
+    this.camera.position.z = 900;
+    this.scene = new THREE.Scene();
+    ambientLight = new THREE.AmbientLight(0x222222);
+    this.scene.add(ambientLight);
+    directionalLight = new THREE.DirectionalLight(0xffeedd, 1);
+    directionalLight.position.set(1, -1, 1).normalize();
+    this.scene.add(directionalLight);
+    this.sphereMaterial = new THREE.MeshLambertMaterial({
+      color: 0xCC0000
+    });
+    this.sphere = new THREE.Mesh(new THREE.SphereGeometry(150, 32, 32), this.sphereMaterial);
+    this.scene.add(this.sphere);
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: false
+    });
+    this.renderer.setSize(512, 512);
+    this.renderer.setClearColor(0x050505, 1);
+    this.renderer.autoClear = false;
+    this.container.appendChild(this.renderer.domElement);
+    return requestAnimationFrame(function(timestamp) {
+      return _this.Render(timestamp);
+    });
+  };
+
+  PreviewWebGL.prototype.Render = function(timestamp) {
+    this.renderer.clear();
+    return this.renderer.render(this.scene, this.camera);
+  };
+
+  return PreviewWebGL;
 
 })();
 

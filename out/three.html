@@ -11,12 +11,13 @@
 <script src="js/vendor/jquery-ui-1.10.3.custom.js"></script>
 <script src="js/vendor/underscore-min.js"></script>
 <script src="js/vendor/backbone.js"></script>
+<script src="js/vendor/three.js"></script>
 <script src="js/teztura-core.js"></script>
 <script src="js/teztura-renderers.js"></script>
 <script src="js/teztura.js"></script>
 </head>
 <body>
-    <div>
+    <div style="visibility: hidden; display: none">
         <div id="renderers">
             <div class="buttons"></div>
             <div class="properties"></div>
@@ -29,8 +30,11 @@
                 <div id="palette"></div>
                 <div class="buttons"></div>
                 <div class="properties"></div>
-            </div>        
+            </div>
         </div>
+    </div>
+
+    <div id="TestWebGL">
     </div>
 
     <!--[if IE]>
