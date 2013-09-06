@@ -213,21 +213,48 @@ createCommandsButtons = function($container) {
 };
 
 createPalette = function($container) {
-  var $slider;
-  $slider = $('<div/>').slider({
-    min: -1.0,
-    max: 1.0,
-    value: editor.get('targetValue'),
-    step: 0.005,
-    change: function(evt, ui) {
-      return editor.set('targetValue', ui.value);
-    }
-  }).appendTo($container);
-  return editor.on('change:targetValue', function() {
-    return $slider.slider({
-      value: editor.get('targetValue')
-    });
+  var $canvas, ctx, local, mouseEvt, repaint;
+  $canvas = $('<canvas/>').attr({
+    width: $container.width(),
+    height: 50
   });
+  $container.append($canvas);
+  ctx = $canvas[0].getContext('2d');
+  repaint = function() {
+    var grd, val;
+    val = Math.round(editor.get('targetValue') * 127.0 + 128.0);
+    ctx.fillStyle = "rgb(" + val + "," + val + "," + val + ")";
+    ctx.fillRect(0, 0, $canvas.width(), $canvas.height() / 2);
+    grd = ctx.createLinearGradient(0, 0, $canvas.width(), $canvas.height());
+    grd.addColorStop(0, '#000');
+    grd.addColorStop(1, '#fff');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, $canvas.height() / 2, $canvas.width(), $canvas.height() / 2);
+    ctx.strokeStyle = "#aaa";
+    return ctx.strokeRect(0, 0, $canvas.width(), $canvas.height());
+  };
+  local = {};
+  local.drag = false;
+  mouseEvt = function(e) {
+    var val, xpos;
+    if (local.drag) {
+      xpos = e.pageX - $container.position().left;
+      val = (xpos / $container.width()) * 2 - 1;
+      return editor.set('targetValue', val);
+    }
+  };
+  $container.mousedown(function(e) {
+    local.drag = true;
+    return mouseEvt(e);
+  });
+  $(document).mouseup(function(e) {
+    return local.drag = false;
+  });
+  $container.mousemove(mouseEvt);
+  editor.on('change:targetValue', function() {
+    return repaint();
+  });
+  return repaint();
 };
 
 loadGradient = function(name, url) {

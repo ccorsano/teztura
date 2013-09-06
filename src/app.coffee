@@ -160,19 +160,44 @@ createCommandsButtons = ($container)->
       cmd.func(editor.get('doc'))
 
 createPalette = ($container)->
-  $slider = $('<div/>').slider({
-    min: -1.0
-    max: 1.0
-    value: editor.get('targetValue')
-    step: 0.005
-    change: (evt, ui)->
-      editor.set('targetValue', ui.value)
-  }).appendTo($container)
+  $canvas = $('<canvas/>').attr {width: $container.width(), height:50}
+  $container.append($canvas)
+  ctx = $canvas[0].getContext('2d')
 
-  editor.on 'change:targetValue', ()->
-    $slider.slider 
-      value: editor.get('targetValue')
+  repaint = ->
+    val = Math.round(editor.get('targetValue') * 127.0 + 128.0)
+    ctx.fillStyle = "rgb(#{val},#{val},#{val})"
+    ctx.fillRect(0, 0, $canvas.width(), $canvas.height()/2)
 
+    grd = ctx.createLinearGradient(0, 0, $canvas.width(), $canvas.height())
+    grd.addColorStop(0, '#000')
+    grd.addColorStop(1, '#fff')
+    ctx.fillStyle = grd
+    ctx.fillRect(0, $canvas.height()/2, $canvas.width(), $canvas.height()/2)
+
+    ctx.strokeStyle = "#aaa";
+    ctx.strokeRect(0, 0, $canvas.width(), $canvas.height())
+
+  local = {}
+  local.drag = false
+
+  mouseEvt = (e)->
+    if local.drag
+      xpos = e.pageX - $container.position().left
+      val = (xpos / $container.width()) * 2 - 1
+      editor.set('targetValue', val)
+
+  $container.mousedown (e)->
+    local.drag = true
+    mouseEvt(e)
+  $(document).mouseup (e)->
+    local.drag = false
+  $container.mousemove mouseEvt
+
+  editor.on 'change:targetValue', ->
+    repaint()
+
+  repaint()
 
 loadGradient = (name, url)->
   $canvas = $('<canvas/>').attr {width: 512, height:1}
